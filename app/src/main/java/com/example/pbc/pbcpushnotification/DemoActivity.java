@@ -25,10 +25,10 @@ public class DemoActivity extends Activity {
 
     public static final String EXTRA_MESSAGE = "message";
     public static final String PROPERTY_REG_ID = "registration_id";
-    private static final String PROPERTY_APP_VERSION = "appVersion";
+    private static final String PROPERTY_APP_VERSION = "1";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
-    String SENDER_ID = "Your-Sender_id";
+    String SENDER_ID = "338252548778";
 
     static final String TAG = "GCMDemo";
 
@@ -40,6 +40,8 @@ public class DemoActivity extends Activity {
 
     String regid;
 
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
@@ -128,16 +130,25 @@ public class DemoActivity extends Activity {
      * shared preferences.
      */
     private void registerInBackground() {
+        Log.i(TAG,"Entered RegisterInBackgroundFunction");
         new AsyncTask() {
 
             @Override
             protected String doInBackground(Object[] params) {
                 String msg = "";
                 try {
+                    Log.i(TAG,"Entered RIBF->NewASYNCTASK TRY");
                     if (gcm == null) {
+                        Log.e(TAG,"Gcm Was Null , Instantiating from context.");
                         gcm = GoogleCloudMessaging.getInstance(context);
+                    } else {
+                        Log.e(TAG,"GCM IS NOT NULL");
+                        Log.e(TAG, gcm.toString());
                     }
+
                     regid = gcm.register(SENDER_ID);
+
+                    Log.i(TAG,regid.toString());
                     msg = "Device registered, registration ID=" + regid;
 
                     // You should send the registration ID to your server over HTTP,
