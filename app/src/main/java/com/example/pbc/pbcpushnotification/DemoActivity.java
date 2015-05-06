@@ -14,7 +14,16 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -59,6 +68,7 @@ public class DemoActivity extends Activity {
                 registerInBackground();
                 Log.i(TAG,"Vasileeeee REG ID IS EMPTY");
             }
+            Log.e(TAG,regid.toString());
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
         }
@@ -139,16 +149,12 @@ public class DemoActivity extends Activity {
                 try {
                     Log.i(TAG,"Entered RIBF->NewASYNCTASK TRY");
                     if (gcm == null) {
-                        Log.e(TAG,"Gcm Was Null , Instantiating from context.");
                         gcm = GoogleCloudMessaging.getInstance(context);
-                    } else {
-                        Log.e(TAG,"GCM IS NOT NULL");
-                        Log.e(TAG, gcm.toString());
                     }
 
                     regid = gcm.register(SENDER_ID);
 
-                    Log.i(TAG,regid.toString());
+//                    Log.i(TAG,regid.toString());
                     msg = "Device registered, registration ID=" + regid;
 
                     // You should send the registration ID to your server over HTTP,
@@ -188,10 +194,17 @@ public class DemoActivity extends Activity {
     private void sendRegistrationIdToBackend(String regid) {
 
         Log.i(TAG,"SendRegistrationIdToBackend CALLED");
-        Log.i(TAG,regid);
-        Log.i(TAG,regid);
-        Log.i(TAG,regid);
+        Log.i(TAG,regid.toString());
 
+        HttpClient client = new DefaultHttpClient();
+        HttpPost post = new HttpPost("http://timedudeapi.cust21.reea.net/timedudeapi/web/api/v1/");
+
+        List<NameValuePair> pairs = new ArrayList<NameValuePair>(2);
+        pairs.add(new BasicNameValuePair("key1", "value1"));
+        pairs.add(new BasicNameValuePair("key2", "value2"));
+
+
+        post.setEntity(new UrlEncodedFormEntity(pairs));
 
 
     }
