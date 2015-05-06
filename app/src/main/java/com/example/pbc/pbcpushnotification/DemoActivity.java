@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
@@ -43,7 +44,7 @@ public class DemoActivity extends Activity {
 
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_demo);
         mDisplay = (TextView) findViewById(R.id.display);
 
         context = getApplicationContext();
@@ -51,9 +52,10 @@ public class DemoActivity extends Activity {
         if (checkPlayServices()) {
             gcm = GoogleCloudMessaging.getInstance(this);
             regid = getRegistrationId(context);
-
+            mDisplay.setTextColor(3);
             if(regid.isEmpty()) {
                 registerInBackground();
+                Log.i(TAG,"Vasileeeee REG ID IS EMPTY");
             }
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
@@ -127,8 +129,9 @@ public class DemoActivity extends Activity {
      */
     private void registerInBackground() {
         new AsyncTask() {
+
             @Override
-            protected String doInBackground(Void... params) {
+            protected String doInBackground(Object[] params) {
                 String msg = "";
                 try {
                     if (gcm == null) {
@@ -141,7 +144,7 @@ public class DemoActivity extends Activity {
                     // so it can use GCM/HTTP or CCS to send messages to your app.
                     // The request to your server should be authenticated if your app
                     // is using accounts.
-                    sendRegistrationIdToBackend();
+                    sendRegistrationIdToBackend(regid);
 
                     // For this demo: we don't need to send it because the device
                     // will send upstream messages to a server that echo back the
@@ -158,7 +161,7 @@ public class DemoActivity extends Activity {
                 return msg;
             }
 
-            @Override
+
             protected void onPostExecute(String msg) {
                 mDisplay.append(msg + "\n");
             }
@@ -171,8 +174,15 @@ public class DemoActivity extends Activity {
      * device sends upstream messages to a server that echoes back the message
      * using the 'from' address in the message.
      */
-    private void sendRegistrationIdToBackend() {
-        // Your implementation here.
+    private void sendRegistrationIdToBackend(String regid) {
+
+        Log.i(TAG,"SendRegistrationIdToBackend CALLED");
+        Log.i(TAG,regid);
+        Log.i(TAG,regid);
+        Log.i(TAG,regid);
+
+
+
     }
 
 
