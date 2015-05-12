@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.http.HttpResponseCache;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -14,14 +16,26 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,6 +50,8 @@ public class DemoActivity extends Activity {
     public static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "1";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private static String USER_AGENT = "";
+
 
     String SENDER_ID = "338252548778";
 
@@ -61,14 +77,20 @@ public class DemoActivity extends Activity {
         context = getApplicationContext();
 
         if (checkPlayServices()) {
+            Log.i(TAG,"Entered checkPlayServices");
             gcm = GoogleCloudMessaging.getInstance(this);
             regid = getRegistrationId(context);
+
+
+
+            Log.i(TAG,"REG ID IS " + regid);
             mDisplay.setTextColor(3);
             if(regid.isEmpty()) {
                 registerInBackground();
-                Log.i(TAG,"Vasileeeee REG ID IS EMPTY");
+//                Log.i(TAG,"Vasileeeee REG ID IS EMPTY");
             }
-            Log.e(TAG,regid.toString());
+//            Log.e(TAG,regid.toString());
+            registerInBackground();
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
         }
@@ -106,6 +128,7 @@ public class DemoActivity extends Activity {
     private String getRegistrationId(Context context) {
         final SharedPreferences prefs = getGCMPreferences(context);
         String registrationId = prefs.getString(PROPERTY_REG_ID, "");
+
         if (registrationId.isEmpty()) {
             Log.i(TAG, "Registration not found.");
             return "";
@@ -154,15 +177,27 @@ public class DemoActivity extends Activity {
 
                     regid = gcm.register(SENDER_ID);
 
-//                    Log.i(TAG,regid.toString());
+                    Log.i(TAG,regid.toString());
                     msg = "Device registered, registration ID=" + regid;
 
                     // You should send the registration ID to your server over HTTP,
                     // so it can use GCM/HTTP or CCS to send messages to your app.
                     // The request to your server should be authenticated if your app
                     // is using accounts.
-                    sendRegistrationIdToBackend(regid);
+//                    sendRegistrationIdToBackend(regid);
+                    String deviceID = Settings.Secure.getString(getContentResolver(),Settings.Secure.ANDROID_ID);
+                    String appVersion = String.valueOf(getAppVersion(context));
 
+
+                    GetMethodExample test = new GetMethodExample();
+                    String returned = null;
+                    try {
+                        returned = test.putRegistration("108258724289500664552", regid,"2", deviceID, appVersion);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    Log.i(TAG, returned);
                     // For this demo: we don't need to send it because the device
                     // will send upstream messages to a server that echo back the
                     // message using the 'from' address in the message.
@@ -191,20 +226,48 @@ public class DemoActivity extends Activity {
      * device sends upstream messages to a server that echoes back the message
      * using the 'from' address in the message.
      */
-    private void sendRegistrationIdToBackend(String regid) {
+    private void sendRegistrationIdToBackend(String regid)  {
 
-        Log.i(TAG,"SendRegistrationIdToBackend CALLED");
-        Log.i(TAG,regid.toString());
-
-        HttpClient client = new DefaultHttpClient();
-        HttpPost post = new HttpPost("http://timedudeapi.cust21.reea.net/timedudeapi/web/api/v1/");
-
-        List<NameValuePair> pairs = new ArrayList<NameValuePair>(2);
-        pairs.add(new BasicNameValuePair("key1", "value1"));
-        pairs.add(new BasicNameValuePair("key2", "value2"));
+        InputStream inputStream = null;
+        String json = "";
+        String urlStr = "";
+        String USER_AGENT = "My custom string here";
 
 
-        post.setEntity(new UrlEncodedFormEntity(pairs));
+        try {
+            Log.i(TAG, "----------------------------------------------------------------Entered IN THE TRY");
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpPost post = new HttpPost("http://timedudeapi.cust21.reea.net/timedudeapi/web/api/v1/redeemItems");
+            post.setHeader("User-Agent", USER_AGENT);
+
+
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+            nameValuePairs.add(new BasicNameValuePair("googleUid", "108258"));
+            nameValuePairs.add(new BasicNameValuePair("gameId", "1"));
+            nameValuePairs.add(new BasicNameValuePair("itemId", "1"));
+            nameValuePairs.add(new BasicNameValuePair("ammount", "1"));
+
+            post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+            HttpResponse response = httpClient.execute(post);
+            HttpEntity httpEntity = response.getEntity();
+            inputStream = httpEntity.getContent();
+        }catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (ClientProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+//        try {
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "iso-8859-1"), 8);
+//            StringBuilder sb = new StringBuilder();
+//            String line = null;
+//            while ((line = reader.readLine()) != null) {
+//                sb.append(line + "\n");
+//            }
+//        }
 
 
     }
