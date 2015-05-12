@@ -77,20 +77,19 @@ public class DemoActivity extends Activity {
         context = getApplicationContext();
 
         if (checkPlayServices()) {
-            Log.i(TAG,"Entered checkPlayServices");
+            Log.i(TAG, "Entered checkPlayServices");
             gcm = GoogleCloudMessaging.getInstance(this);
             regid = getRegistrationId(context);
 
 
-
-            Log.i(TAG,"REG ID IS " + regid);
+            Log.i(TAG, "REG ID IS " + regid);
             mDisplay.setTextColor(3);
-            if(regid.isEmpty()) {
+            if (regid.isEmpty()) {
                 registerInBackground();
 //                Log.i(TAG,"Vasileeeee REG ID IS EMPTY");
             }
 //            Log.e(TAG,regid.toString());
-            registerInBackground();
+//            registerInBackground();
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
         }
@@ -119,11 +118,11 @@ public class DemoActivity extends Activity {
 
     /**
      * Gets the current registration ID for application on GCM service.
-     * <p>
+     * <p/>
      * If result is empty, the app needs to register.
      *
      * @return registration ID, or empty string if there is no existing
-     *         registration ID.
+     * registration ID.
      */
     private String getRegistrationId(Context context) {
         final SharedPreferences prefs = getGCMPreferences(context);
@@ -158,46 +157,34 @@ public class DemoActivity extends Activity {
 
     /**
      * Registers the application with GCM servers asynchronously.
-     * <p>
+     * <p/>
      * Stores the registration ID and app versionCode in the application's
      * shared preferences.
      */
     private void registerInBackground() {
-        Log.i(TAG,"Entered RegisterInBackgroundFunction");
+        Log.i(TAG, "Entered RegisterInBackgroundFunction");
         new AsyncTask() {
 
             @Override
             protected String doInBackground(Object[] params) {
                 String msg = "";
                 try {
-                    Log.i(TAG,"Entered RIBF->NewASYNCTASK TRY");
+                    Log.i(TAG, "Entered RIBF->NewASYNCTASK TRY");
                     if (gcm == null) {
                         gcm = GoogleCloudMessaging.getInstance(context);
                     }
 
                     regid = gcm.register(SENDER_ID);
 
-                    Log.i(TAG,regid.toString());
+                    Log.i(TAG, regid.toString());
                     msg = "Device registered, registration ID=" + regid;
 
                     // You should send the registration ID to your server over HTTP,
                     // so it can use GCM/HTTP or CCS to send messages to your app.
                     // The request to your server should be authenticated if your app
                     // is using accounts.
-//                    sendRegistrationIdToBackend(regid);
-                    String deviceID = Settings.Secure.getString(getContentResolver(),Settings.Secure.ANDROID_ID);
-                    String appVersion = String.valueOf(getAppVersion(context));
+                    sendRegistrationIdToBackend(regid);
 
-
-                    GetMethodExample test = new GetMethodExample();
-                    String returned = null;
-                    try {
-                        returned = test.putRegistration("108258724289500664552", regid,"2", deviceID, appVersion);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    Log.i(TAG, returned);
                     // For this demo: we don't need to send it because the device
                     // will send upstream messages to a server that echo back the
                     // message using the 'from' address in the message.
@@ -226,50 +213,37 @@ public class DemoActivity extends Activity {
      * device sends upstream messages to a server that echoes back the message
      * using the 'from' address in the message.
      */
-    private void sendRegistrationIdToBackend(String regid)  {
+    private void sendRegistrationIdToBackend(String regid) {
 
-        InputStream inputStream = null;
-        String json = "";
-        String urlStr = "";
-        String USER_AGENT = "My custom string here";
+        GetMethodExample test = new GetMethodExample();
+
+        String googleUid = "108258724289500664552";
+        String gameId = "2";
+        String deviceID = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        String appVersion = String.valueOf(getAppVersion(context));
 
 
+        Log.i(TAG, "Get UserExists ========================================================");
+        String userexists = null;
         try {
-            Log.i(TAG, "----------------------------------------------------------------Entered IN THE TRY");
-            HttpClient httpClient = new DefaultHttpClient();
-            HttpPost post = new HttpPost("http://timedudeapi.cust21.reea.net/timedudeapi/web/api/v1/redeemItems");
-            post.setHeader("User-Agent", USER_AGENT);
+            userexists = test.getUserexists(googleUid);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.e(TAG, userexists);
+        Log.i(TAG, "END Get UserExists =====================================================");
+
+        Log.i(TAG, "Get UserGameInfo ========================================================");
 
 
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-            nameValuePairs.add(new BasicNameValuePair("googleUid", "108258"));
-            nameValuePairs.add(new BasicNameValuePair("gameId", "1"));
-            nameValuePairs.add(new BasicNameValuePair("itemId", "1"));
-            nameValuePairs.add(new BasicNameValuePair("ammount", "1"));
-
-            post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-            HttpResponse response = httpClient.execute(post);
-            HttpEntity httpEntity = response.getEntity();
-            inputStream = httpEntity.getContent();
-        }catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (ClientProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-//        try {
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "iso-8859-1"), 8);
-//            StringBuilder sb = new StringBuilder();
-//            String line = null;
-//            while ((line = reader.readLine()) != null) {
-//                sb.append(line + "\n");
-//            }
-//        }
-
-
+        Log.i(TAG, "END Get UserGameInfo ========================================================");
+        String returned = null;
+        try {
+            returned = test.putRegistration(googleUid, regid, gameId, deviceID, appVersion);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.e(TAG, returned);
     }
 
 
@@ -278,7 +252,7 @@ public class DemoActivity extends Activity {
      * {@code SharedPreferences}.
      *
      * @param context application's context.
-     * @param regId registration ID
+     * @param regId   registration ID
      */
     private void storeRegistrationId(Context context, String regId) {
         final SharedPreferences prefs = getGCMPreferences(context);

@@ -21,7 +21,7 @@ public class HttpExample extends Activity {
         GetMethodExample test = new GetMethodExample();
         String returned = null;
         try {
-            returned = test.getInternetData();
+            returned = test.getUserexists("13");
         } catch (Exception e) {
             e.printStackTrace();
         }

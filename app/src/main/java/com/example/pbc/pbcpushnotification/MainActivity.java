@@ -1,13 +1,18 @@
 package com.example.pbc.pbcpushnotification;
 
-import android.support.v7.app.ActionBarActivity;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
+import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.plus.PlusClient;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity {
 
 
     static final String TAG = "GCMDemo";
@@ -17,6 +22,16 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        SignInButton btn = (SignInButton) findViewById(R.id.googlebtn);
+
+            btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
+
         Log.i(TAG, "vasile");
     }
 

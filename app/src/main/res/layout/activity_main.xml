@@ -26,11 +26,10 @@
             android:layout_alignEnd="@+id/textView" />
     </ScrollView>
 
-    <Button
+    <com.google.android.gms.common.SignInButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sign In Google"
-        android:id="@+id/googleSignIn"
+        android:id="@+id/googlebtn"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
 </RelativeLayout>

@@ -25,13 +25,14 @@ import java.util.List;
 public class GetMethodExample {
 
     static final String TAG = "LOOOOGG";
-    public String getInternetData() throws Exception{
+
+    public String getUserexists(String userId) throws Exception {
 
         BufferedReader in = null;
         String data = null;
         try {
             HttpClient client = new DefaultHttpClient();
-            URI website = new URI("http://www.mybringback.com");
+            URI website = new URI("http://timedudeapi.cust21.reea.net/timedudeapi/web/api/v1/userexists/" + userId);
             HttpGet request = new HttpGet();
             request.setURI(website);
             HttpResponse response = client.execute(request);
@@ -50,11 +51,11 @@ public class GetMethodExample {
             return data;
 
         } finally {
-            if (in != null){
+            if (in != null) {
                 try {
                     in.close();
                     return data;
-                } catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -62,7 +63,7 @@ public class GetMethodExample {
 
     }
 
-    public String postRedeemItems() throws Exception{
+    public String postRedeemItems() throws Exception {
 
         BufferedReader in = null;
         String data = null;
@@ -101,7 +102,7 @@ public class GetMethodExample {
             data = sb.toString();
             return data;
         } finally {
-            if (in != null){
+            if (in != null) {
                 try {
                     in.close();
                     return data;
@@ -112,7 +113,7 @@ public class GetMethodExample {
         }
     }
 
-    public String putRegistration(String googleUid, String registrationKey, String gameId, String deviceId , String game_version) throws Exception{
+    public String putRegistration(String googleUid, String registrationKey, String gameId, String deviceId, String game_version) throws Exception {
 
 
         String GOOGLE_UID = googleUid;
@@ -162,7 +163,7 @@ public class GetMethodExample {
             data = sb.toString();
             return data;
         } finally {
-            if (in != null){
+            if (in != null) {
                 try {
                     in.close();
                     return data;
@@ -173,4 +174,40 @@ public class GetMethodExample {
         }
     }
 
+    public String getUserGameInfo(String userId, String gameId, String rewardTypeId) throws Exception {
+
+        BufferedReader in = null;
+        String data = null;
+        try {
+            HttpClient client = new DefaultHttpClient();
+            URI website = new URI("http://timedudeapi.cust21.reea.net/timedudeapi/web/api/v1/usergameinfo/" + userId + "/" + gameId + "/" + rewardTypeId);
+            HttpGet request = new HttpGet();
+            request.setURI(website);
+            HttpResponse response = client.execute(request);
+
+            in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+
+            StringBuffer sb = new StringBuffer("");
+            String line = "";
+            String newLine = System.getProperty("line.separator");
+            while ((line = in.readLine()) != null) {
+                sb.append(line + newLine);
+            }
+            in.close();
+
+            data = sb.toString();
+            return data;
+
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                    return data;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
 }
