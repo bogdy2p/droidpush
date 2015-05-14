@@ -169,6 +169,7 @@ public class GoogleSignInActivity extends FragmentActivity implements
         mGoogleApiClient = buildGoogleApiClient();
     }
 
+
     private GoogleApiClient buildGoogleApiClient() {
         // When we build the GoogleApiClient we specify where connected and
         // connection failed callbacks should be returned, which Google APIs our

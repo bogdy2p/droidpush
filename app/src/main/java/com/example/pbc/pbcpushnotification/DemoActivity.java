@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.net.http.HttpResponseCache;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -16,29 +15,13 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.Console;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Array;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -54,9 +37,7 @@ public class DemoActivity extends Activity {
     private static String USER_AGENT = "";
     public static final String PREFS_NAME = "GoogleUserData";
 
-
     String SENDER_ID = "338252548778";
-
     static final String TAG = "GCMDemo";
 
     TextView mDisplay;
@@ -66,37 +47,102 @@ public class DemoActivity extends Activity {
     Context context;
     String regid;
     String ACCOUNT_ID, ACCOUNT_NAME ,FIRST_NAME , LAST_NAME, LOCATION , LANGUAGE;
+    String USER_REWARDS = "norewards";
+    String GAME_ID;
+    String REWARD_TYPE_ID;
+    String CURRENT_COINS;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_demo);
         mDisplay = (TextView) findViewById(R.id.display);
-
         context = getApplicationContext();
 
+
         if (checkPlayServices()) {
-
-            Log.i(TAG, "Entered checkPlayServices");
-
-
-
             gcm = GoogleCloudMessaging.getInstance(this);
             regid = getRegistrationId(context);
 
+            if (regid.isEmpty()) {  registerInBackground(); }
 
-            Log.i(TAG, "REG ID IS " + regid);
-            mDisplay.setTextColor(3);
-            if (regid.isEmpty()) {
-                registerInBackground();
+            SharedPreferences googleUserData = getSharedPreferences(PREFS_NAME, 0);
+            ACCOUNT_ID = googleUserData.getString("ACCOUNT_ID", "null");
+//            refreshUserCoinsInformation();
+
+            String response = googleUserData.getString("CURRENT_COINS", "NOT YET");
+
+            String asd = "false";
+            String ammount = "0";
+            String value;
+
+
+
+            class TestAsync extends AsyncTask<Void, Integer, String>
+            {
+                protected void onPreExecute (){
+                    Log.e("PreExceute","On pre Exceute......");
+                }
+
+                protected String doInBackground(Void...arg0) {
+                    Log.e("DoINBackGround","On doInBackground...");
+
+                    for(int i=0; i<10; i++){
+                        Integer in = new Integer(i);
+                        publishProgress(i);
+                    }
+                    return "You are at PostExecute";
+                }
+
+                protected void onProgressUpdate(Integer...a){
+                    Log.e(TAG,"You are in progress update ... " + a[0]);
+                }
+
+                protected void onPostExecute(String result) {
+                    Log.e(TAG,""+result);
+                    mDisplay.setText("Modified text by the postexecute");
+                }
             }
-        } else {
+
+            new TestAsync().execute();
+
+
+
+//            try {
+//                JSONObject jsonObject = new JSONObject(response);
+//                asd = jsonObject.getString("success");
+//
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//            boolean is_ok = Boolean.parseBoolean(asd);
+//            if (is_ok) {
+//                try {
+//                    JSONObject jsonObject = new JSONObject(response);
+//                    ammount = jsonObject.getString("message");
+//                    JSONObject jsonObject1 = new JSONObject(ammount);
+//                    value = jsonObject1.getString("value");
+//                    ammount = value;
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//
+//            }
+//            mDisplay.setText(ammount);
+        }
+         else {
             Log.i(TAG, "No valid Google Play Services APK found.");
         }
     }
 
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+        refreshUserCoinsInformation();
+    }
 
     /**
      * Check the device to make sure it has the Google Play Services APK. If
@@ -157,6 +203,45 @@ public class DemoActivity extends Activity {
     }
 
 
+    private void refreshUserCoinsInformation(){
+        new AsyncTask() {
+            String msg = "ERRORMESSAGE";
+
+            @Override
+            protected Object doInBackground(Object[] params) {
+                try {
+                    GetMethodExample apiCaller = new GetMethodExample();
+                    USER_REWARDS = apiCaller.getUserGameInfo(ACCOUNT_ID, "2", "1");
+                    msg = USER_REWARDS;
+                    Log.e(TAG,"INTRAT IN DO IN BG");
+                    SharedPreferences googleUserData = getSharedPreferences(PREFS_NAME, 0);
+                    SharedPreferences.Editor editor = googleUserData.edit();
+                    editor.putString("CURRENT_COINS", msg);
+                    editor.apply();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return msg;
+            }
+
+
+            protected void onPostExecute(String msg){
+                TextView testtextview = (TextView) findViewById(R.id.display);
+                testtextview.setText(msg);
+            }
+
+//            protected onPostExecute(Void a) {
+//
+//                Log.e(TAG,"Entered ZZZZZZZZZZZZZZZZZZz");
+//                mDisplay.setText(msg);
+//                mDisplay.invalidate();
+//                Log.w(TAG,msg);
+//            }
+        }.execute();
+
+    }
+
     /**
      * Registers the application with GCM servers asynchronously.
      * <p/>
@@ -164,7 +249,7 @@ public class DemoActivity extends Activity {
      * shared preferences.
      */
     private void registerInBackground() {
-        Log.i(TAG, "Entered RegisterInBackgroundFunction");
+//        Log.i(TAG, "Entered RegisterInBackgroundFunction");
         new AsyncTask() {
 
             @Override
@@ -178,7 +263,7 @@ public class DemoActivity extends Activity {
 
                     regid = gcm.register(SENDER_ID);
 
-                    Log.i(TAG, regid.toString());
+//                    Log.i(TAG, regid.toString());
                     msg = "Device registered, registration ID=" + regid;
 
                     // You should send the registration ID to your server over HTTP,
@@ -227,21 +312,11 @@ public class DemoActivity extends Activity {
         LOCATION = googleUserData.getString("LOCATION","null");
         LANGUAGE = googleUserData.getString("LANGUAGE","null");
 
-        Log.i(TAG, ACCOUNT_NAME);
-        Log.i(TAG, ACCOUNT_ID);
-        Log.i(TAG, FIRST_NAME);
-        Log.i(TAG, LAST_NAME);
-        Log.i(TAG, LOCATION);
-        Log.i(TAG, LANGUAGE);
-
-
         GetMethodExample test = new GetMethodExample();
-
         String googleUid = ACCOUNT_ID;
         String gameId = "2";
         String deviceID = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
         String appVersion = String.valueOf(getAppVersion(context));
-
 
         Log.i(TAG, "Get UserExists ========================================================");
         String userexists = null;
@@ -257,21 +332,15 @@ public class DemoActivity extends Activity {
             String addUserToDatabase;
             try {
                 addUserToDatabase = test.postNewuser(ACCOUNT_NAME,ACCOUNT_ID,FIRST_NAME,LAST_NAME,LOCATION,LANGUAGE,"birthday");
-
             }catch (Exception e){
                 e.printStackTrace();
             }
 
-
         }
-
-
-
-
         Log.i(TAG, "Get UserGameInfo ========================================================");
-
-
         Log.i(TAG, "END Get UserGameInfo ========================================================");
+        //TODO : CHECK IF A REGISTRATION FOR THIS CURRENT USER AND THIS VERSION OF THE APP ALREADY EXISTS
+
         String returned = null;
         try {
             returned = test.putRegistration(googleUid, regid, gameId, deviceID, appVersion);

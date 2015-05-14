@@ -28,11 +28,6 @@ import java.util.List;
 public class GetMethodExample{
 
     static final String TAG = "LOOOOGG";
-    public static final String PREFS_NAME = "GoogleUserData";
-
-
-
-
 
 
     public String getUserexists(String userId) throws Exception {
@@ -191,8 +186,10 @@ public class GetMethodExample{
             HttpClient client = new DefaultHttpClient();
             URI website = new URI("http://timedudeapi.cust21.reea.net/timedudeapi/web/api/v1/usergameinfo/" + userId + "/" + gameId + "/" + rewardTypeId);
             HttpGet request = new HttpGet();
+//            Log.e(TAG,website.toString());
             request.setURI(website);
             HttpResponse response = client.execute(request);
+//            Log.e(TAG,response.toString());
 
             in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
