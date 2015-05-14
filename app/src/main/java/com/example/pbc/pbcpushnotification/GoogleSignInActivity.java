@@ -23,6 +23,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -57,7 +58,7 @@ public class GoogleSignInActivity extends FragmentActivity implements
         ResultCallback<People.LoadPeopleResult>, View.OnClickListener,
         CheckBox.OnCheckedChangeListener, GoogleApiClient.ServerAuthCodeCallbacks {
 
-    private static final String TAG = "android-plus-quickstart";
+    private static final String TAG = "GoogleSIGNINACtivity";
 
     private static final int STATE_DEFAULT = 0;
     private static final int STATE_SIGN_IN = 1;
@@ -132,6 +133,8 @@ public class GoogleSignInActivity extends FragmentActivity implements
     private ListView mCirclesListView;
     private ArrayAdapter<String> mCirclesAdapter;
     private ArrayList<String> mCirclesList;
+    public static final String PREFS_NAME = "GoogleUserData";
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -174,8 +177,8 @@ public class GoogleSignInActivity extends FragmentActivity implements
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Plus.API)
-//                .addApi(Plus.API, Plus.PlusOptions.builder().build())
-                .addScope(Plus.SCOPE_PLUS_LOGIN);
+                .addScope(Plus.SCOPE_PLUS_LOGIN)
+                .addScope(Plus.SCOPE_PLUS_PROFILE);
 
         if (mRequestServerAuthCode) {
             checkServerAuthConfiguration();
@@ -280,8 +283,34 @@ public class GoogleSignInActivity extends FragmentActivity implements
         // Hide the sign-in options, they no longer apply
         findViewById(R.id.layout_server_auth).setVisibility(View.GONE);
 
-        // Retrieve some profile information to personalize our app for the user.
+        // Retrieve Profile & Account Name information to personalize our app for the user.
         Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+        String ACCOUNT_NAME = Plus.AccountApi.getAccountName(mGoogleApiClient);
+
+        String ACCOUNT_ID = currentUser.getId();
+        String FIRST_NAME = currentUser.getName().getFamilyName();
+        String LAST_NAME = currentUser.getName().getGivenName();
+        String LOCATION = currentUser.getCurrentLocation();
+        Boolean IS_VERIFIED_ACCOUNT = currentUser.isVerified();
+        String LANGUAGE = currentUser.getLanguage();
+
+        // Save the data in the SharedPreferences to be able to use it from Other Activity.
+
+        SharedPreferences googleUserData = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = googleUserData.edit();
+        editor.putString("ACCOUNT_NAME", ACCOUNT_NAME);
+        editor.putString("ACCOUNT_ID", ACCOUNT_ID);
+        editor.putString("FIRST_NAME", FIRST_NAME);
+        editor.putString("LAST_NAME", LAST_NAME);
+        editor.putString("LOCATION", LOCATION);
+        editor.putBoolean("IS_VERIFIED", IS_VERIFIED_ACCOUNT);
+        editor.putString("LANGUAGE", LANGUAGE);
+        editor.commit();
+
+        Intent i = new Intent(getApplicationContext(), DemoActivity.class);
+        startActivity(i);
+
+
 
         mStatus.setText(String.format(
                 getResources().getString(R.string.signed_in_as),
@@ -451,10 +480,8 @@ public class GoogleSignInActivity extends FragmentActivity implements
                     });
         } else {
 
-            int googlePlayServiceAvaillable = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-
             return new AlertDialog.Builder(this)
-                    .setMessage(R.string.play_services_error + " error code: " + mSignInError + " availble : " + googlePlayServiceAvaillable)
+                    .setMessage(R.string.play_services_error)
                     .setPositiveButton(R.string.close,
                             new DialogInterface.OnClickListener() {
                                 @Override

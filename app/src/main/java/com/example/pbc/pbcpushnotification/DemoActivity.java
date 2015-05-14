@@ -29,6 +29,7 @@ import org.apache.http.message.BasicNameValuePair;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -51,6 +52,7 @@ public class DemoActivity extends Activity {
     private static final String PROPERTY_APP_VERSION = "1";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static String USER_AGENT = "";
+    public static final String PREFS_NAME = "GoogleUserData";
 
 
     String SENDER_ID = "338252548778";
@@ -62,9 +64,10 @@ public class DemoActivity extends Activity {
     AtomicInteger msgId = new AtomicInteger();
     SharedPreferences prefs;
     Context context;
-
     String regid;
-
+    String vasile;
+    String ACCOUNT_ID, ACCOUNT_NAME ,FIRST_NAME , LAST_NAME, LOCATION , LANGUAGE;
+    Boolean IS_VERIFIED;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,7 +80,24 @@ public class DemoActivity extends Activity {
         context = getApplicationContext();
 
         if (checkPlayServices()) {
+
             Log.i(TAG, "Entered checkPlayServices");
+
+            SharedPreferences googleUserData = getSharedPreferences(PREFS_NAME, 0);
+            ACCOUNT_NAME = googleUserData.getString("ACCOUNT_NAME","noname");
+            ACCOUNT_ID = googleUserData.getString("ACCOUNT_ID","noid");
+            FIRST_NAME = googleUserData.getString("FIRST_NAME","null");
+            LAST_NAME = googleUserData.getString("LAST_NAME","null");
+            LOCATION = googleUserData.getString("LOCATION","null");
+            LANGUAGE = googleUserData.getString("LANGUAGE","null");
+
+            Log.i(TAG, ACCOUNT_NAME);
+            Log.i(TAG, ACCOUNT_ID);
+            Log.i(TAG, FIRST_NAME);
+            Log.i(TAG, LAST_NAME);
+            Log.i(TAG, LOCATION);
+            Log.i(TAG, LANGUAGE);
+
             gcm = GoogleCloudMessaging.getInstance(this);
             regid = getRegistrationId(context);
 
@@ -86,10 +106,7 @@ public class DemoActivity extends Activity {
             mDisplay.setTextColor(3);
             if (regid.isEmpty()) {
                 registerInBackground();
-//                Log.i(TAG,"Vasileeeee REG ID IS EMPTY");
             }
-//            Log.e(TAG,regid.toString());
-//            registerInBackground();
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
         }
