@@ -52,7 +52,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MainActivity extends FragmentActivity implements
+public class GoogleSignInActivity extends FragmentActivity implements
         ConnectionCallbacks, OnConnectionFailedListener,
         ResultCallback<People.LoadPeopleResult>, View.OnClickListener,
         CheckBox.OnCheckedChangeListener, GoogleApiClient.ServerAuthCodeCallbacks {
@@ -546,7 +546,7 @@ public class MainActivity extends FragmentActivity implements
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(MainActivity.this, responseBody, Toast.LENGTH_LONG).show();
+                    Toast.makeText(GoogleSignInActivity.this, responseBody, Toast.LENGTH_LONG).show();
                 }
             });
             return (statusCode == 200);
@@ -579,83 +579,3 @@ public class MainActivity extends FragmentActivity implements
         }
     }
 }
-
-
-//public class MainActivity extends Activity implements ConnectionCallbacks, OnConnectionFailedListener {
-//
-//
-//    /* Request code used to invoke sign in user interactions. */
-//    private static final int RC_SIGN_IN = 0;
-//
-//
-//    /* Client used to interact with Google APIs. */
-//    private GoogleApiClient mGoogleApiClient;
-//
-//
-//    private boolean mSignInClicked;
-//
-//    /* A flag indicating that a PendingIntent is in progress and prevents
-//    * us from starting further intents.
-//    */
-//    private boolean mIntentInProgress;
-//
-//
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//
-//        mGoogleApiClient = new GoogleApiClient.Builder(this)
-//                .addConnectionCallbacks(this)
-//                .addApi(Plus.API)
-//                .addScope(Plus.SCOPE_PLUS_LOGIN)
-//                .addOnConnectionFailedListener(this)
-//                .build();
-//    }
-//
-//    protected void onStart() {
-//        super.onStart();
-//        mGoogleApiClient.connect();
-//    }
-//
-//    protected void onStop() {
-//        super.onStop();
-//
-//        if (mGoogleApiClient.isConnected()) {
-//            mGoogleApiClient.disconnect();
-//        }
-//    }
-//
-//
-//    public void onConnected(Bundle connectionHint) {
-//        mSignInClicked = false;
-//        Toast.makeText(this, "User is connected", Toast.LENGTH_LONG).show();
-//    }
-//
-//    @Override
-//    public void onConnectionSuspended(int i) {
-//        mGoogleApiClient.connect();
-//    }
-//
-//    @Override
-//    public void onConnectionFailed(ConnectionResult connectionResult) {
-//        if (!mIntentInProgress) {
-//            if (mSignInClicked && connectionResult.hasResolution()) {
-//                try {
-//                    mIntentInProgress = true;
-//                    startIntentSenderForResult(connectionResult.getResolution().getIntentSender(), RC_SIGN_IN, null, 0, 0, 0);
-//
-//                } catch (IntentSender.SendIntentException e) {
-//                    // The intent was canceled before it was sent.  Return to the default
-//                    // state and attempt to connect to get an updated ConnectionResult.
-//                    mIntentInProgress = false;
-//                    mGoogleApiClient.connect();
-//                }
-//            }
-//        }
-//    }
-//
-//
-//
-//}
-
-///TO DO : https://developers.google.com/+/mobile/android/sign-in
-// CONTINUE THIS.
