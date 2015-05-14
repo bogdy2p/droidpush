@@ -1,5 +1,8 @@
 package com.example.pbc.pbcpushnotification;
 
+import android.app.Activity;
+import android.content.SharedPreferences;
+import android.content.Context;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;
@@ -22,9 +25,15 @@ import java.util.List;
 /**
  * Created by pbc on 12.05.2015.
  */
-public class GetMethodExample {
+public class GetMethodExample{
 
     static final String TAG = "LOOOOGG";
+    public static final String PREFS_NAME = "GoogleUserData";
+
+
+
+
+
 
     public String getUserexists(String userId) throws Exception {
 
@@ -209,5 +218,59 @@ public class GetMethodExample {
             }
         }
 
+    }
+
+    public String postNewuser(String ACCOUNT_NAME, String ACCOUNT_ID, String FIRST_NAME, String LAST_NAME, String LOCATION, String LANGUAGE, String BIRTHDAY) throws Exception {
+
+        BufferedReader in = null;
+        String data = null;
+
+         try {
+            HttpClient client = new DefaultHttpClient();
+            URI postUrl = new URI("http://timedudeapi.cust21.reea.net/timedudeapi/web/api/v1/newuser");
+            HttpPost httpPost = new HttpPost();
+            httpPost.setURI(postUrl);
+
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(4);
+            httpPost.addHeader("x-wsse", "ApiKey=\"bf4bff30-4664-48f9-87d5-fb78520df136\"");
+            httpPost.getParams().setParameter(
+                    CoreProtocolPNames.USE_EXPECT_CONTINUE, Boolean.FALSE);
+            nameValuePairs.add(new BasicNameValuePair("googleUid", ACCOUNT_ID));
+            nameValuePairs.add(new BasicNameValuePair("email", ACCOUNT_NAME));
+            nameValuePairs.add(new BasicNameValuePair("firstname", FIRST_NAME));
+            nameValuePairs.add(new BasicNameValuePair("lastname", LAST_NAME));
+            nameValuePairs.add(new BasicNameValuePair("location", LOCATION));
+            nameValuePairs.add(new BasicNameValuePair("language", LANGUAGE));
+            nameValuePairs.add(new BasicNameValuePair("birthday", BIRTHDAY));
+
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+            Log.w(TAG, nameValuePairs.toString());
+            Log.w(TAG, httpPost.toString());
+
+            HttpResponse response = client.execute(httpPost);
+
+            in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+
+            StringBuffer sb = new StringBuffer("");
+            String line = "";
+            String newLine = System.getProperty("line.separator");
+            while ((line = in.readLine()) != null) {
+                sb.append(line + newLine);
+            }
+            in.close();
+
+            data = sb.toString();
+            return data;
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                    return data;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

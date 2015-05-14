@@ -65,9 +65,7 @@ public class DemoActivity extends Activity {
     SharedPreferences prefs;
     Context context;
     String regid;
-    String vasile;
     String ACCOUNT_ID, ACCOUNT_NAME ,FIRST_NAME , LAST_NAME, LOCATION , LANGUAGE;
-    Boolean IS_VERIFIED;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -83,20 +81,7 @@ public class DemoActivity extends Activity {
 
             Log.i(TAG, "Entered checkPlayServices");
 
-            SharedPreferences googleUserData = getSharedPreferences(PREFS_NAME, 0);
-            ACCOUNT_NAME = googleUserData.getString("ACCOUNT_NAME","noname");
-            ACCOUNT_ID = googleUserData.getString("ACCOUNT_ID","noid");
-            FIRST_NAME = googleUserData.getString("FIRST_NAME","null");
-            LAST_NAME = googleUserData.getString("LAST_NAME","null");
-            LOCATION = googleUserData.getString("LOCATION","null");
-            LANGUAGE = googleUserData.getString("LANGUAGE","null");
 
-            Log.i(TAG, ACCOUNT_NAME);
-            Log.i(TAG, ACCOUNT_ID);
-            Log.i(TAG, FIRST_NAME);
-            Log.i(TAG, LAST_NAME);
-            Log.i(TAG, LOCATION);
-            Log.i(TAG, LANGUAGE);
 
             gcm = GoogleCloudMessaging.getInstance(this);
             regid = getRegistrationId(context);
@@ -232,9 +217,27 @@ public class DemoActivity extends Activity {
      */
     private void sendRegistrationIdToBackend(String regid) {
 
+
+
+        SharedPreferences googleUserData = getSharedPreferences(PREFS_NAME, 0);
+        ACCOUNT_NAME = googleUserData.getString("ACCOUNT_NAME","noname");
+        ACCOUNT_ID = googleUserData.getString("ACCOUNT_ID","noid");
+        FIRST_NAME = googleUserData.getString("FIRST_NAME","null");
+        LAST_NAME = googleUserData.getString("LAST_NAME","null");
+        LOCATION = googleUserData.getString("LOCATION","null");
+        LANGUAGE = googleUserData.getString("LANGUAGE","null");
+
+        Log.i(TAG, ACCOUNT_NAME);
+        Log.i(TAG, ACCOUNT_ID);
+        Log.i(TAG, FIRST_NAME);
+        Log.i(TAG, LAST_NAME);
+        Log.i(TAG, LOCATION);
+        Log.i(TAG, LANGUAGE);
+
+
         GetMethodExample test = new GetMethodExample();
 
-        String googleUid = "108258724289500664552";
+        String googleUid = ACCOUNT_ID;
         String gameId = "2";
         String deviceID = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
         String appVersion = String.valueOf(getAppVersion(context));
@@ -249,6 +252,21 @@ public class DemoActivity extends Activity {
         }
         Log.e(TAG, userexists);
         Log.i(TAG, "END Get UserExists =====================================================");
+
+        if (userexists.contains("User not found.")){
+            String addUserToDatabase;
+            try {
+                addUserToDatabase = test.postNewuser(ACCOUNT_NAME,ACCOUNT_ID,FIRST_NAME,LAST_NAME,LOCATION,LANGUAGE,"birthday");
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+
+        }
+
+
+
 
         Log.i(TAG, "Get UserGameInfo ========================================================");
 
