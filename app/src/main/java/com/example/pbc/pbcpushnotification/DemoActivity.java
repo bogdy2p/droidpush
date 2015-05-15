@@ -106,7 +106,7 @@ public class DemoActivity extends Activity {
                         value = message.getString("value");
 //                        Log.e("THE VALUE HERE IS", value);
                     }else{
-                        value = "01";
+                        value = "0";
                     }
 //                    Log.w("JsoNObject : message", message.toString());
 //                    Log.w("JsoNObject : value", value);
