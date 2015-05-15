@@ -46,7 +46,7 @@ public class DemoActivity extends Activity {
     SharedPreferences prefs;
     Context context;
     String regid;
-    String ACCOUNT_ID, ACCOUNT_NAME ,FIRST_NAME , LAST_NAME, LOCATION , LANGUAGE;
+    String ACCOUNT_ID, ACCOUNT_NAME, FIRST_NAME, LAST_NAME, LOCATION, LANGUAGE;
     String USER_REWARDS = "norewards";
     String GAME_ID;
     String REWARD_TYPE_ID;
@@ -66,82 +66,79 @@ public class DemoActivity extends Activity {
             gcm = GoogleCloudMessaging.getInstance(this);
             regid = getRegistrationId(context);
 
-            if (regid.isEmpty()) {  registerInBackground(); }
+            if (regid.isEmpty()) {
+                registerInBackground();
+            }
 
             SharedPreferences googleUserData = getSharedPreferences(PREFS_NAME, 0);
             ACCOUNT_ID = googleUserData.getString("ACCOUNT_ID", "null");
 //            refreshUserCoinsInformation();
 
             String response = googleUserData.getString("CURRENT_COINS", "NOT YET");
-
             String asd = "false";
             String ammount = "0";
             String value;
 
+            getUserCoinsInformation();
 
-
-            class TestAsync extends AsyncTask<Void, Integer, String>
-            {
-                protected void onPreExecute (){
-                    Log.e("PreExceute","On pre Exceute......");
-                }
-
-                protected String doInBackground(Void...arg0) {
-                    Log.e("DoINBackGround","On doInBackground...");
-
-                    for(int i=0; i<10; i++){
-                        Integer in = new Integer(i);
-                        publishProgress(i);
-                    }
-                    return "You are at PostExecute";
-                }
-
-                protected void onProgressUpdate(Integer...a){
-                    Log.e(TAG,"You are in progress update ... " + a[0]);
-                }
-
-                protected void onPostExecute(String result) {
-                    Log.e(TAG,""+result);
-                    mDisplay.setText("Modified text by the postexecute");
-                }
-            }
-
-            new TestAsync().execute();
-
-
-
-//            try {
-//                JSONObject jsonObject = new JSONObject(response);
-//                asd = jsonObject.getString("success");
-//
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//            boolean is_ok = Boolean.parseBoolean(asd);
-//            if (is_ok) {
-//                try {
-//                    JSONObject jsonObject = new JSONObject(response);
-//                    ammount = jsonObject.getString("message");
-//                    JSONObject jsonObject1 = new JSONObject(ammount);
-//                    value = jsonObject1.getString("value");
-//                    ammount = value;
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//
-//            }
-//            mDisplay.setText(ammount);
-        }
-         else {
+        } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
         }
     }
 
-    @Override
-    protected void onResume() {
+    private void getUserCoinsInformation() {
 
-        super.onResume();
-        refreshUserCoinsInformation();
+        class TestAsync extends AsyncTask<Void, Integer, String> {
+
+            protected String doInBackground(Void... arg0) {
+                String msg = "ERRORMESSAGE";
+
+                GetMethodExample apiCaller = new GetMethodExample();
+                try {
+                    USER_REWARDS = apiCaller.getUserGameInfo(ACCOUNT_ID, "2", "1");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                msg = USER_REWARDS;
+                Log.e(TAG, "INTRAT IN DO IN BG");
+                Log.e("MSG este", msg);
+
+                String value = "0";
+                try {
+                    JSONObject json = new JSONObject(msg);
+                    JSONObject message = new JSONObject();
+
+                    String success = json.getString("success");
+                    Log.w(TAG, success);
+                    if (success.equals("true")) {
+                        Log.e(TAG,"SUCCESS WAS TRUE ENTERED IF");
+                        message = new JSONObject(json.getString("message"));
+                        value = message.getString("value");
+                        Log.e("THE VALUE HERE IS", value);
+                    }else{
+                        message = new JSONObject("");
+                        value = "01";
+                    }
+                    Log.w("JsoNObject : message", message.toString());
+                    Log.w("JsoNObject : value", value);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                SharedPreferences googleUserData = getSharedPreferences(PREFS_NAME, 0);
+                SharedPreferences.Editor editor = googleUserData.edit();
+                editor.putString("CURRENT_COINS", value);
+                editor.apply();
+                return value;
+            }
+            protected void onProgressUpdate(Integer... a) {
+                Log.e(TAG, "You are in progress update ... ");
+            }
+            protected void onPostExecute(String value) {
+                Log.e(TAG, "Value now " + value);
+                mDisplay.setText(value);
+            }
+        }
+        new TestAsync().execute();
     }
 
     /**
@@ -203,7 +200,7 @@ public class DemoActivity extends Activity {
     }
 
 
-    private void refreshUserCoinsInformation(){
+    private void refreshUserCoinsInformation() {
         new AsyncTask() {
             String msg = "ERRORMESSAGE";
 
@@ -213,7 +210,7 @@ public class DemoActivity extends Activity {
                     GetMethodExample apiCaller = new GetMethodExample();
                     USER_REWARDS = apiCaller.getUserGameInfo(ACCOUNT_ID, "2", "1");
                     msg = USER_REWARDS;
-                    Log.e(TAG,"INTRAT IN DO IN BG");
+                    Log.e(TAG, "INTRAT IN DO IN BG");
                     SharedPreferences googleUserData = getSharedPreferences(PREFS_NAME, 0);
                     SharedPreferences.Editor editor = googleUserData.edit();
                     editor.putString("CURRENT_COINS", msg);
@@ -226,7 +223,7 @@ public class DemoActivity extends Activity {
             }
 
 
-            protected void onPostExecute(String msg){
+            protected void onPostExecute(String msg) {
                 TextView testtextview = (TextView) findViewById(R.id.display);
                 testtextview.setText(msg);
             }
@@ -239,7 +236,6 @@ public class DemoActivity extends Activity {
 //                Log.w(TAG,msg);
 //            }
         }.execute();
-
     }
 
     /**
@@ -303,14 +299,13 @@ public class DemoActivity extends Activity {
     private void sendRegistrationIdToBackend(String regid) {
 
 
-
         SharedPreferences googleUserData = getSharedPreferences(PREFS_NAME, 0);
-        ACCOUNT_NAME = googleUserData.getString("ACCOUNT_NAME","noname");
-        ACCOUNT_ID = googleUserData.getString("ACCOUNT_ID","noid");
-        FIRST_NAME = googleUserData.getString("FIRST_NAME","null");
-        LAST_NAME = googleUserData.getString("LAST_NAME","null");
-        LOCATION = googleUserData.getString("LOCATION","null");
-        LANGUAGE = googleUserData.getString("LANGUAGE","null");
+        ACCOUNT_NAME = googleUserData.getString("ACCOUNT_NAME", "noname");
+        ACCOUNT_ID = googleUserData.getString("ACCOUNT_ID", "noid");
+        FIRST_NAME = googleUserData.getString("FIRST_NAME", "null");
+        LAST_NAME = googleUserData.getString("LAST_NAME", "null");
+        LOCATION = googleUserData.getString("LOCATION", "null");
+        LANGUAGE = googleUserData.getString("LANGUAGE", "null");
 
         GetMethodExample test = new GetMethodExample();
         String googleUid = ACCOUNT_ID;
@@ -328,11 +323,11 @@ public class DemoActivity extends Activity {
         Log.e(TAG, userexists);
         Log.i(TAG, "END Get UserExists =====================================================");
 
-        if (userexists.contains("User not found.")){
+        if (userexists.contains("User not found.")) {
             String addUserToDatabase;
             try {
-                addUserToDatabase = test.postNewuser(ACCOUNT_NAME,ACCOUNT_ID,FIRST_NAME,LAST_NAME,LOCATION,LANGUAGE,"birthday");
-            }catch (Exception e){
+                addUserToDatabase = test.postNewuser(ACCOUNT_NAME, ACCOUNT_ID, FIRST_NAME, LAST_NAME, LOCATION, LANGUAGE, "birthday");
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -381,4 +376,6 @@ public class DemoActivity extends Activity {
             throw new RuntimeException("Could not get package name: " + e);
         }
     }
+
+
 }
