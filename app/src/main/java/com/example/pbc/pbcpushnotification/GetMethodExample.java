@@ -1,8 +1,5 @@
 package com.example.pbc.pbcpushnotification;
 
-import android.app.Activity;
-import android.content.SharedPreferences;
-import android.content.Context;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;

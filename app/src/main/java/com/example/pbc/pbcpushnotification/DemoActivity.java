@@ -9,11 +9,15 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.plus.Plus;
 
 
 import org.json.JSONArray;
@@ -27,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by pbc on 06.05.2015.
  */
-public class DemoActivity extends Activity {
+public class DemoActivity extends Activity implements View.OnClickListener{
 
 
     public static final String EXTRA_MESSAGE = "message";
@@ -36,10 +40,11 @@ public class DemoActivity extends Activity {
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static String USER_AGENT = "";
     public static final String PREFS_NAME = "GoogleUserData";
+    private GoogleApiClient mGoogleApiClient;
 
     String SENDER_ID = "338252548778";
     static final String TAG = "GCMDemo";
-
+    private Button mSignOutButton;
     TextView mDisplay;
     GoogleCloudMessaging gcm;
     Context context;
@@ -54,6 +59,9 @@ public class DemoActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_demo);
         mDisplay = (TextView) findViewById(R.id.display);
+        mSignOutButton = (Button) findViewById(R.id.sign_out_button);
+        mSignOutButton.setOnClickListener(this);
+        mSignOutButton.setEnabled(true);
         context = getApplicationContext();
 
 
@@ -367,4 +375,36 @@ public class DemoActivity extends Activity {
     }
 
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.sign_out_button:
+                Log.e("CLICKCLICK ","SIGN OUT BUTTON");
+                // We clear the default account on sign out so that Google Play
+                // services will not return an onConnected callback without user
+                // interaction.
+//                if (mGoogleApiClient.isConnected()) {
+//                    Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+//                    mGoogleApiClient.disconnect();
+//                }
+                onSignedOut();
+                break;
+        }
+
+    }
+    private void onSignedOut() {
+        // Update the UI to reflect that the user is signed out.
+//        mSignInButton.setEnabled(true);
+        Log.e("ONSIGNEDOUT ","ENTERED");
+        mSignOutButton.setEnabled(false);
+//        mRevokeButton.setEnabled(false);
+
+        // Show the sign-in options
+//        findViewById(R.id.layout_server_auth).setVisibility(View.VISIBLE);
+
+//        mStatus.setText(R.string.status_signed_out);
+
+//        mCirclesList.clear();
+//        mCirclesAdapter.notifyDataSetChanged();
+    }
 }
