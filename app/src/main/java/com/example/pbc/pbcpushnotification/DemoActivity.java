@@ -42,15 +42,10 @@ public class DemoActivity extends Activity {
 
     TextView mDisplay;
     GoogleCloudMessaging gcm;
-    AtomicInteger msgId = new AtomicInteger();
-    SharedPreferences prefs;
     Context context;
     String regid;
     String ACCOUNT_ID, ACCOUNT_NAME, FIRST_NAME, LAST_NAME, LOCATION, LANGUAGE;
     String USER_REWARDS = "norewards";
-    String GAME_ID;
-    String REWARD_TYPE_ID;
-    String CURRENT_COINS;
 
 
     @Override
@@ -73,10 +68,6 @@ public class DemoActivity extends Activity {
             SharedPreferences googleUserData = getSharedPreferences(PREFS_NAME, 0);
             ACCOUNT_ID = googleUserData.getString("ACCOUNT_ID", "null");
             getUserCoinsInformation();
-//            String response = googleUserData.getString("CURRENT_COINS", "NOT YET");
-//            String asd = "false";
-//            String ammount = "0";
-//            String value;
 
 
 
@@ -87,10 +78,10 @@ public class DemoActivity extends Activity {
 
     private void getUserCoinsInformation() {
 
-        class TestAsync extends AsyncTask<Void, Integer, String> {
+        class GetUserCoinsAsync extends AsyncTask<Void, Integer, String> {
 
             protected String doInBackground(Void... arg0) {
-                String msg = "ERRORMESSAGE";
+                String msg;
 
                 GetMethodExample apiCaller = new GetMethodExample();
                 try {
@@ -105,17 +96,16 @@ public class DemoActivity extends Activity {
                 String value = "0";
                 try {
                     JSONObject json = new JSONObject(msg);
-                    JSONObject message = new JSONObject();
+                    JSONObject message;
 
                     String success = json.getString("success");
-                    Log.w(TAG, success);
+//                    Log.w(TAG, success);
                     if (success.equals("true")) {
-                        Log.e(TAG,"SUCCESS WAS TRUE ENTERED IF");
+//                        Log.e(TAG,"SUCCESS WAS TRUE ENTERED IF");
                         message = new JSONObject(json.getString("message"));
                         value = message.getString("value");
-                        Log.e("THE VALUE HERE IS", value);
+//                        Log.e("THE VALUE HERE IS", value);
                     }else{
-                        message = new JSONObject("");
                         value = "01";
                     }
 //                    Log.w("JsoNObject : message", message.toString());
@@ -133,11 +123,11 @@ public class DemoActivity extends Activity {
                 Log.e(TAG, "You are in progress update ... ");
             }
             protected void onPostExecute(String value) {
-                Log.e(TAG, "Value now " + value);
+                Log.e(TAG, "This user currently has  " + value + " coins in the database for this app.");
                 mDisplay.setText(value);
             }
         }
-        new TestAsync().execute();
+        new GetUserCoinsAsync().execute();
     }
 
     /**
