@@ -72,14 +72,13 @@ public class DemoActivity extends Activity {
 
             SharedPreferences googleUserData = getSharedPreferences(PREFS_NAME, 0);
             ACCOUNT_ID = googleUserData.getString("ACCOUNT_ID", "null");
-//            refreshUserCoinsInformation();
-
-            String response = googleUserData.getString("CURRENT_COINS", "NOT YET");
-            String asd = "false";
-            String ammount = "0";
-            String value;
-
             getUserCoinsInformation();
+//            String response = googleUserData.getString("CURRENT_COINS", "NOT YET");
+//            String asd = "false";
+//            String ammount = "0";
+//            String value;
+
+
 
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
@@ -100,8 +99,8 @@ public class DemoActivity extends Activity {
                     e.printStackTrace();
                 }
                 msg = USER_REWARDS;
-                Log.e(TAG, "INTRAT IN DO IN BG");
-                Log.e("MSG este", msg);
+//                Log.e(TAG, "INTRAT IN DO IN BG");
+//                Log.e("MSG este", msg);
 
                 String value = "0";
                 try {
@@ -119,8 +118,8 @@ public class DemoActivity extends Activity {
                         message = new JSONObject("");
                         value = "01";
                     }
-                    Log.w("JsoNObject : message", message.toString());
-                    Log.w("JsoNObject : value", value);
+//                    Log.w("JsoNObject : message", message.toString());
+//                    Log.w("JsoNObject : value", value);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -200,43 +199,43 @@ public class DemoActivity extends Activity {
     }
 
 
-    private void refreshUserCoinsInformation() {
-        new AsyncTask() {
-            String msg = "ERRORMESSAGE";
-
-            @Override
-            protected Object doInBackground(Object[] params) {
-                try {
-                    GetMethodExample apiCaller = new GetMethodExample();
-                    USER_REWARDS = apiCaller.getUserGameInfo(ACCOUNT_ID, "2", "1");
-                    msg = USER_REWARDS;
-                    Log.e(TAG, "INTRAT IN DO IN BG");
-                    SharedPreferences googleUserData = getSharedPreferences(PREFS_NAME, 0);
-                    SharedPreferences.Editor editor = googleUserData.edit();
-                    editor.putString("CURRENT_COINS", msg);
-                    editor.apply();
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return msg;
-            }
-
-
-            protected void onPostExecute(String msg) {
-                TextView testtextview = (TextView) findViewById(R.id.display);
-                testtextview.setText(msg);
-            }
-
-//            protected onPostExecute(Void a) {
+//    private void refreshUserCoinsInformation() {
+//        new AsyncTask() {
+//            String msg = "ERRORMESSAGE";
 //
-//                Log.e(TAG,"Entered ZZZZZZZZZZZZZZZZZZz");
-//                mDisplay.setText(msg);
-//                mDisplay.invalidate();
-//                Log.w(TAG,msg);
+//            @Override
+//            protected Object doInBackground(Object[] params) {
+//                try {
+//                    GetMethodExample apiCaller = new GetMethodExample();
+//                    USER_REWARDS = apiCaller.getUserGameInfo(ACCOUNT_ID, "2", "1");
+//                    msg = USER_REWARDS;
+//                    Log.e(TAG, "INTRAT IN DO IN BG");
+//                    SharedPreferences googleUserData = getSharedPreferences(PREFS_NAME, 0);
+//                    SharedPreferences.Editor editor = googleUserData.edit();
+//                    editor.putString("CURRENT_COINS", msg);
+//                    editor.apply();
+//
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                return msg;
 //            }
-        }.execute();
-    }
+//
+//
+//            protected void onPostExecute(String msg) {
+//                TextView testtextview = (TextView) findViewById(R.id.display);
+//                testtextview.setText(msg);
+//            }
+//
+////            protected onPostExecute(Void a) {
+////
+////                Log.e(TAG,"Entered ZZZZZZZZZZZZZZZZZZz");
+////                mDisplay.setText(msg);
+////                mDisplay.invalidate();
+////                Log.w(TAG,msg);
+////            }
+//        }.execute();
+//    }
 
     /**
      * Registers the application with GCM servers asynchronously.
