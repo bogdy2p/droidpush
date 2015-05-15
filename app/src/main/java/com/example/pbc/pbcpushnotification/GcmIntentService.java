@@ -7,11 +7,14 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.View;
 
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
@@ -21,6 +24,10 @@ import android.util.Log;
  * wake lock.
  */
 public class GcmIntentService extends IntentService {
+
+
+
+
     public static final int NOTIFICATION_ID = 1;
     private NotificationManager mNotificationManager;
     NotificationCompat.Builder builder;
@@ -92,11 +99,14 @@ public class GcmIntentService extends IntentService {
                         .setContentTitle("PbcPush Notification Received")
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(msg))
-                        .setContentText(msg)
-                        .setVibrate(new long[] {0 ,3000, 50, 3000, 300, 4000, 100, 4000, 100})
-                        .setLights(Color.RED, 3000, 3000);
+                        .setContentText(msg);
+//                        .setVibrate(new long[] {0 ,500 ,50, 500})
+//                        .setLights(Color.RED, 3000, 3000);
 
         mBuilder.setContentIntent(contentIntent);
         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+
     }
+
+
 }

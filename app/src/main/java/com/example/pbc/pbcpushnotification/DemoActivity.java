@@ -2,12 +2,15 @@ package com.example.pbc.pbcpushnotification;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -31,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by pbc on 06.05.2015.
  */
-public class DemoActivity extends Activity implements View.OnClickListener{
+public class DemoActivity extends Activity implements View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
 
     public static final String EXTRA_MESSAGE = "message";
@@ -55,7 +58,7 @@ public class DemoActivity extends Activity implements View.OnClickListener{
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
+        GoogleSignInActivity.GoogleSignInActivity.finish();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_demo);
         mDisplay = (TextView) findViewById(R.id.display);
@@ -64,6 +67,7 @@ public class DemoActivity extends Activity implements View.OnClickListener{
         mSignOutButton.setEnabled(true);
         context = getApplicationContext();
 
+        mGoogleApiClient = buildGoogleApiClient();
 
         if (checkPlayServices()) {
             gcm = GoogleCloudMessaging.getInstance(this);
@@ -78,10 +82,25 @@ public class DemoActivity extends Activity implements View.OnClickListener{
             getUserCoinsInformation();
 
 
-
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
         }
+    }
+
+    private GoogleApiClient buildGoogleApiClient() {
+        // When we build the GoogleApiClient we specify where connected and
+        // connection failed callbacks should be returned, which Google APIs our
+        // app uses and which OAuth 2.0 scopes our app requests.
+        GoogleApiClient.Builder builder = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(Plus.API)
+                .addScope(Plus.SCOPE_PLUS_LOGIN)
+                .addScope(Plus.SCOPE_PLUS_PROFILE);
+
+
+
+        return builder.build();
     }
 
     private void getUserCoinsInformation() {
@@ -113,7 +132,7 @@ public class DemoActivity extends Activity implements View.OnClickListener{
                         message = new JSONObject(json.getString("message"));
                         value = message.getString("value");
 //                        Log.e("THE VALUE HERE IS", value);
-                    }else{
+                    } else {
                         value = "0";
                     }
 //                    Log.w("JsoNObject : message", message.toString());
@@ -127,9 +146,11 @@ public class DemoActivity extends Activity implements View.OnClickListener{
                 editor.apply();
                 return value;
             }
+
             protected void onProgressUpdate(Integer... a) {
                 Log.e(TAG, "You are in progress update ... ");
             }
+
             protected void onPostExecute(String value) {
                 Log.e(TAG, "This user currently has  " + value + " coins in the database for this app.");
                 mDisplay.setText(value);
@@ -379,23 +400,29 @@ public class DemoActivity extends Activity implements View.OnClickListener{
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.sign_out_button:
-                Log.e("CLICKCLICK ","SIGN OUT BUTTON");
+                Log.e("CLICKCLICK ", "SIGN OUT BUTTON");
                 // We clear the default account on sign out so that Google Play
                 // services will not return an onConnected callback without user
                 // interaction.
-//                if (mGoogleApiClient.isConnected()) {
-//                    Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-//                    mGoogleApiClient.disconnect();
-//                }
+                if (mGoogleApiClient.isConnected()) {
+                    Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+//                    Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
+                    mGoogleApiClient.disconnect();
+                }
+
+
+                mGoogleApiClient = buildGoogleApiClient();
+                mGoogleApiClient.connect();
                 onSignedOut();
                 break;
         }
 
     }
+
     private void onSignedOut() {
         // Update the UI to reflect that the user is signed out.
 //        mSignInButton.setEnabled(true);
-        Log.e("ONSIGNEDOUT ","ENTERED");
+        Log.e("ONSIGNEDOUT ", "ENTERED");
         mSignOutButton.setEnabled(false);
 //        mRevokeButton.setEnabled(false);
 
@@ -406,5 +433,26 @@ public class DemoActivity extends Activity implements View.OnClickListener{
 
 //        mCirclesList.clear();
 //        mCirclesAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
     }
 }

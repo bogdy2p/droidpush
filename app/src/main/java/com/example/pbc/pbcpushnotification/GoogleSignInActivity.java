@@ -16,6 +16,7 @@ import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 import com.google.android.gms.plus.model.people.PersonBuffer;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
@@ -134,12 +135,15 @@ public class GoogleSignInActivity extends FragmentActivity implements
     private ArrayAdapter<String> mCirclesAdapter;
     private ArrayList<String> mCirclesList;
     public static final String PREFS_NAME = "GoogleUserData";
-
+    public static Activity GoogleSignInActivity;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        GoogleSignInActivity = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+
 
         mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
         mSignOutButton = (Button) findViewById(R.id.sign_out_button);
@@ -309,19 +313,20 @@ public class GoogleSignInActivity extends FragmentActivity implements
         editor.commit();
 
         Intent i = new Intent(getApplicationContext(), DemoActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);
+        finish();
 
 
-
-        mStatus.setText(String.format(
-                getResources().getString(R.string.signed_in_as),
-                currentUser.getDisplayName()));
-
-        Plus.PeopleApi.loadVisible(mGoogleApiClient, null)
-                .setResultCallback(this);
-
-        // Indicate that the sign in process is complete.
-        mSignInProgress = STATE_DEFAULT;
+//        mStatus.setText(String.format(
+//                getResources().getString(R.string.signed_in_as),
+//                currentUser.getDisplayName()));
+//
+//        Plus.PeopleApi.loadVisible(mGoogleApiClient, null)
+//                .setResultCallback(this);
+//
+//        // Indicate that the sign in process is complete.
+//        mSignInProgress = STATE_DEFAULT;
     }
 
     /* onConnectionFailed is called when our Activity could not connect to Google
